@@ -1,5 +1,6 @@
 const express = require('express');
 const monsoose = require('mongoose');
+const cors = require('cors');
 const routes = require('./routes');
 
 const app = express();
@@ -9,6 +10,7 @@ monsoose.connect('mongodb+srv://marcos:l4cun4@cluster0-hnlwd.mongodb.net/week10?
     useUnifiedTopology: true
 });
 
+app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(express.json());
 app.use(routes);
 
