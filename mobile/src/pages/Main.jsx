@@ -5,6 +5,7 @@ import { requestPermissionsAsync, getCurrentPositionAsync } from 'expo-location'
 import { MaterialIcons } from '@expo/vector-icons';
 
 import api from '../services/api';
+import { connect, desconnect, subscribeToNewDevs } from '../services/socket';
 
 function Main(props) {
     const [devs, setDevs] = useState([]);
@@ -34,6 +35,22 @@ function Main(props) {
         loadInitialPosition();
     }, []);
 
+    useEffect(() => {
+        subscribeToNewDevs(dev => setDevs([...devs, dev]));
+    }, [devs]);
+
+    function setupWebsocket() {
+        desconnect();
+
+        const { latitude, longitude } = currentRegion;
+        
+        connect(
+            latitude,
+            longitude,
+            techs,
+        );
+    };
+
     async function loadDevs() {
         const { latitude, longitude } = currentRegion;
 
@@ -46,10 +63,10 @@ function Main(props) {
         });
 
         setDevs(response.data.devs);
+        setupWebsocket();
     }
 
     function handleRegionChanged(region) {
-        console.log(region)
         setCurrentRegion(region);
     }
 
@@ -85,7 +102,7 @@ function Main(props) {
                     autoCapitalize="words"
                     autoCorrect={false}
                     value={techs}
-                    onChange={setTechs}
+                    onChangeText={setTechs}
                 />
 
                 <TouchableOpacity style={styles.loadButton} onPress={loadDevs} >
